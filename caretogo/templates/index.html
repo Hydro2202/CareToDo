@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareToGo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">CareToGo Nurse Task Management</h1>
+
+    <div class="bg-white p-6 rounded-xl shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">Add Task</h2>
+      <form id="taskForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="number" id="nurse" placeholder="Nurse ID" class="border p-2 rounded" required>
+        <input type="text" id="patient_name" placeholder="Patient Name" class="border p-2 rounded" required>
+        <input type="text" id="task_description" placeholder="Task Description" class="border p-2 rounded md:col-span-2" required>
+        <input type="datetime-local" id="schedule" class="border p-2 rounded" required>
+        <select id="status" class="border p-2 rounded">
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+        </select>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded md:col-span-2">Add Task</button>
+      </form>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow">
+      <h2 class="text-xl font-semibold mb-4">Task List</h2>
+      <div id="taskList" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
