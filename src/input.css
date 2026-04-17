@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@source "../templates";
+@source "../tasks";
+@source "../tasks/templates";
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
