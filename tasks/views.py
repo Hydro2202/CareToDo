@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task, Nurse
 
 
@@ -61,7 +61,7 @@ def add_task(request):
         status = request.POST.get('status')
         priority = request.POST.get('priority')
 
-        nurse = Nurse.objects.get(id=nurse_id)
+        nurse = get_object_or_404(Nurse, id=nurse_id)
 
         Task.objects.create(
             nurse=nurse,
@@ -77,3 +77,48 @@ def add_task(request):
         return redirect('task_list')
 
     return render(request, 'add_task.html', {'nurses': nurses})
+
+
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    nurses = Nurse.objects.all()
+
+    if request.method == 'POST':
+        nurse_id = request.POST.get('nurse')
+        task.nurse = get_object_or_404(Nurse, id=nurse_id)
+        task.patient_name = request.POST.get('patient_name')
+        task.title = request.POST.get('title')
+        task.description = request.POST.get('description')
+        task.scheduled_date = request.POST.get('scheduled_date')
+        task.scheduled_time = request.POST.get('scheduled_time') or None
+        task.status = request.POST.get('status')
+        task.priority = request.POST.get('priority')
+        task.save()
+
+        return redirect('task_list')
+
+    context = {
+        'task': task,
+        'nurses': nurses,
+    }
+    return render(request, 'edit_task.html', context)
+
+
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        task.delete()
+        return redirect('task_list')
+
+    return render(request, 'delete_task.html', {'task': task})
+
+
+def complete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        task.status = 'completed'
+        task.save()
+
+    return redirect('task_list')

@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Task - CareToGo</title>
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="min-h-full bg-slate-100 text-slate-800">
+  <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
+
+    <aside class="hidden lg:flex flex-col border-r border-slate-200 bg-slate-950 text-white">
+      <div class="px-6 py-6 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 font-bold text-white shadow-lg">C</div>
+          <div>
+            <h1 class="text-xl font-bold tracking-tight">CareToGo</h1>
+            <p class="text-sm text-slate-400">Nurse Task Management</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="min-w-0">
+      <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
+        <div class="flex items-center justify-between px-5 py-4 sm:px-8">
+          <div>
+            <p class="text-sm font-medium text-sky-600">CareToGo Dashboard</p>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900">Edit Task</h2>
+          </div>
+          <a href="{% url 'task_list' %}" class="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-300/40 hover:bg-slate-800">
+            Back to Tasks
+          </a>
+        </div>
+      </header>
+
+      <div class="px-5 py-6 sm:px-8">
+        <section class="rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
+          <div class="mb-6">
+            <h3 class="text-xl font-bold tracking-tight text-slate-900">Update Task Information</h3>
+            <p class="text-sm text-slate-500">Edit the task details and save your changes.</p>
+          </div>
+
+          <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+              <label class="mb-2 block text-sm font-semibold text-slate-700">Assigned Nurse</label>
+              <select name="nurse" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+                {% for nurse in nurses %}
+                <option value="{{ nurse.id }}" {% if nurse.id == task.nurse.id %}selected{% endif %}>
+                  {{ nurse.full_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Patient Name</label>
+                <input type="text" name="patient_name" value="{{ task.patient_name }}" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Task Title</label>
+                <input type="text" name="title" value="{{ task.title }}" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-semibold text-slate-700">Description</label>
+              <textarea name="description" rows="5" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">{{ task.description }}</textarea>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Scheduled Date</label>
+                <input type="date" name="scheduled_date" value="{{ task.scheduled_date|date:'Y-m-d' }}" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Scheduled Time</label>
+                <input type="time" name="scheduled_time" value="{% if task.scheduled_time %}{{ task.scheduled_time|time:'H:i' }}{% endif %}" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+              </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Status</label>
+                <select name="status" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+                  <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
+                  <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                  <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Priority</label>
+                <select name="priority" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+                  <option value="Low" {% if task.priority == 'Low' %}selected{% endif %}>Low</option>
+                  <option value="Medium" {% if task.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                  <option value="High" {% if task.priority == 'High' %}selected{% endif %}>High</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button type="submit" class="rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-300/30 hover:bg-slate-800">
+                Update Task
+              </button>
+              <a href="{% url 'task_list' %}" class="rounded-2xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200">
+                Cancel
+              </a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
