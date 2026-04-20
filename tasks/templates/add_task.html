@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add Task</title>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  <script defer src="{% static 'js/auth-session.js' %}"></script>
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800">
   <div class="max-w-5xl mx-auto px-5 py-10 sm:px-8">
@@ -14,9 +15,14 @@
         <p class="text-sm font-medium text-sky-600">Task Creation</p>
         <h1 class="text-3xl font-bold tracking-tight text-slate-900">Add New Nurse Task</h1>
       </div>
-      <a href="{% url 'dashboard' %}" class="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
-        Back to Dashboard
-      </a>
+      <div class="flex items-center gap-3">
+        <a href="{% url 'dashboard' %}" class="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
+          Back to Dashboard
+        </a>
+        <button onclick="logout()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200">
+          Logout
+        </button>
+      </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -126,5 +132,8 @@
       </div>
     </div>
   </div>
+  <script>
+    initAuthGuard();
+  </script>
 </body>
 </html>

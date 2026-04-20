@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Delete Task</title>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  <script defer src="{% static 'js/auth-session.js' %}"></script>
   <style>
     :root {
       --title: #0f172a;
@@ -53,6 +54,27 @@
       transition: all 0.2s ease;
     }
 
+    .btn-neutral {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+    }
+
+    .btn-neutral:hover {
+      background: #f8fafc;
+    }
+
+    .btn-danger {
+      border: 1px solid #be123c;
+      background: #e11d48;
+      color: #ffffff;
+      box-shadow: 0 10px 20px rgba(225, 29, 72, 0.25);
+    }
+
+    .btn-danger:hover {
+      background: #be123c;
+    }
+
     @media (max-width: 640px) {
       .modal-card { padding: 22px; width: min(94vw, 620px); }
     }
@@ -94,7 +116,7 @@
       <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
         <a
           href="{% url 'task_list' %}"
-          class="btn inline-flex w-full items-center justify-center border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 sm:flex-1"
+          class="btn btn-neutral inline-flex w-full items-center justify-center sm:flex-1"
         >
           Cancel
         </a>
@@ -102,7 +124,7 @@
           {% csrf_token %}
           <button
             type="submit"
-            class="btn inline-flex w-full items-center justify-center gap-2 bg-rose-600 text-white shadow-lg shadow-rose-300/40 hover:bg-rose-700 sm:flex-1"
+            class="btn btn-danger inline-flex w-full items-center justify-center gap-2 sm:flex-1"
           >
             <span aria-hidden="true">🗑️</span>
             Delete
@@ -111,5 +133,8 @@
       </div>
     </div>
   </div>
+  <script>
+    initAuthGuard();
+  </script>
 </body>
 </html>

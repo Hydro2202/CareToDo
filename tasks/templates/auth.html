@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareToDo Authentication</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          keyframes: {
+            fadeInUp: {
+              "0%": { opacity: "0", transform: "translateY(12px) scale(0.98)" },
+              "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+            },
+            fadeIn: {
+              "0%": { opacity: "0" },
+              "100%": { opacity: "1" },
+            }
+          },
+          animation: {
+            "fade-in-up": "fadeInUp 350ms ease-out",
+            "fade-in": "fadeIn 220ms ease-out",
+          },
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+  <div class="relative min-h-screen overflow-hidden">
+    <div class="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl"></div>
+    <div class="pointer-events-none absolute right-0 top-40 h-80 w-80 rounded-full bg-blue-400/20 blur-3xl"></div>
+    <div class="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-sky-300/10 blur-3xl"></div>
+
+    <main class="relative flex min-h-screen items-center justify-center p-4">
+      <section class="w-full max-w-md rounded-2xl bg-white/90 p-8 shadow-2xl backdrop-blur-lg ring-1 ring-white/40 animate-fade-in-up">
+        <div class="mb-6 flex rounded-full bg-slate-100 p-1">
+          <button
+            id="tab-login"
+            type="button"
+            class="w-1/2 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-300"
+          >
+            Login
+          </button>
+          <button
+            id="tab-signup"
+            type="button"
+            class="w-1/2 rounded-full px-4 py-2 text-sm font-semibold text-gray-500 transition-all duration-300"
+          >
+            Sign Up
+          </button>
+        </div>
+
+        <header class="mb-6 text-center">
+          <h1 class="text-2xl font-bold text-gray-800">CareToDo</h1>
+          <p class="mt-1 text-sm text-gray-500">Nurse Task Management System</p>
+        </header>
+
+        {% if messages %}
+        <div class="mb-4 space-y-2">
+          {% for message in messages %}
+          <div class="rounded-lg px-4 py-2 text-sm {% if message.tags == 'success' %}bg-emerald-100 text-emerald-800{% else %}bg-rose-100 text-rose-800{% endif %}">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form id="form-login" method="POST" class="space-y-4 animate-fade-in">
+          {% csrf_token %}
+          <input type="hidden" name="auth_action" value="login">
+          <div class="space-y-1">
+            <label for="login-email" class="text-sm font-medium text-gray-700">Email</label>
+            <input id="login-email" name="email" type="text" placeholder="you@example.com" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required />
+          </div>
+
+          <div class="space-y-1">
+            <label for="login-password" class="text-sm font-medium text-gray-700">Password</label>
+            <div class="relative">
+              <input id="login-password" name="password" type="password" placeholder="Enter your password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pr-12" required />
+              <button id="toggle-login-password" type="button" class="absolute inset-y-0 right-3 my-auto text-sm text-blue-500 hover:text-blue-700">👁️</button>
+            </div>
+          </div>
+
+          <button id="login-submit" type="submit" class="w-full py-2 rounded-full text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 hover:scale-105 hover:shadow-lg transition duration-300">
+            Login
+          </button>
+        </form>
+
+        <form id="form-signup" method="POST" class="hidden space-y-4 animate-fade-in">
+          {% csrf_token %}
+          <input type="hidden" name="auth_action" value="signup">
+          <div class="space-y-1">
+            <label for="signup-name" class="text-sm font-medium text-gray-700">Full Name</label>
+            <input id="signup-name" name="full_name" type="text" placeholder="Your full name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required />
+          </div>
+
+          <div class="space-y-1">
+            <label for="signup-email" class="text-sm font-medium text-gray-700">Email</label>
+            <input id="signup-email" name="email" type="email" placeholder="you@example.com" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required />
+          </div>
+
+          <div class="space-y-1">
+            <label for="signup-password" class="text-sm font-medium text-gray-700">Password</label>
+            <input id="signup-password" name="password" type="password" placeholder="Create password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required />
+          </div>
+
+          <div class="space-y-1">
+            <label for="signup-confirm-password" class="text-sm font-medium text-gray-700">Confirm Password</label>
+            <input id="signup-confirm-password" name="confirm_password" type="password" placeholder="Confirm password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required />
+          </div>
+
+          <button id="signup-submit" type="submit" class="w-full py-2 rounded-full text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 hover:scale-105 hover:shadow-lg transition duration-300">
+            Sign Up
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const loginTab = document.getElementById("tab-login");
+    const signupTab = document.getElementById("tab-signup");
+    const loginForm = document.getElementById("form-login");
+    const signupForm = document.getElementById("form-signup");
+    const loginPassword = document.getElementById("login-password");
+    const toggleLoginPassword = document.getElementById("toggle-login-password");
+    const activeTab = "{{ active_tab|default:'login' }}";
+
+    function setActiveTab(tab) {
+      const loginActive = tab === "login";
+
+      loginTab.className = loginActive
+        ? "w-1/2 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-300"
+        : "w-1/2 rounded-full px-4 py-2 text-sm font-semibold text-gray-500 transition-all duration-300";
+
+      signupTab.className = loginActive
+        ? "w-1/2 rounded-full px-4 py-2 text-sm font-semibold text-gray-500 transition-all duration-300"
+        : "w-1/2 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-300";
+
+      if (loginActive) {
+        signupForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        loginForm.classList.remove("animate-fade-in");
+        void loginForm.offsetWidth;
+        loginForm.classList.add("animate-fade-in");
+      } else {
+        loginForm.classList.add("hidden");
+        signupForm.classList.remove("hidden");
+        signupForm.classList.remove("animate-fade-in");
+        void signupForm.offsetWidth;
+        signupForm.classList.add("animate-fade-in");
+      }
+    }
+
+    loginTab.addEventListener("click", () => setActiveTab("login"));
+    signupTab.addEventListener("click", () => setActiveTab("signup"));
+
+    toggleLoginPassword.addEventListener("click", () => {
+      loginPassword.type = loginPassword.type === "password" ? "text" : "password";
+    });
+
+    setActiveTab(activeTab);
+  </script>
+</body>
+</html>
