@@ -2,9 +2,16 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 from django.db.models import Q
+from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Task, Nurse
+from .models import Task, Nurse, UserProfile
+
+
+def get_or_create_user_profile(user):
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    return profile
 
 
 def auth_page(request):
@@ -72,6 +79,9 @@ def dashboard(request):
     completed_tasks = tasks.filter(status='completed').count()
     nurses = Nurse.objects.all()
 
+    profile = get_or_create_user_profile(request.user)
+    display_name = request.user.first_name or request.user.username
+
     context = {
         'total_tasks': total_tasks,
         'pending_tasks': pending_tasks,
@@ -79,6 +89,9 @@ def dashboard(request):
         'completed_tasks': completed_tasks,
         'tasks': tasks[:5],
         'nurses': nurses[:5],
+        'profile_name': display_name,
+        'profile_department': profile.department or "Not set",
+        'profile_role': "RN",
     }
     return render(request, 'dashboard.html', context)
 
@@ -191,3 +204,56 @@ def complete_task(request, task_id):
         task.save()
 
     return redirect('task_list')
+
+
+@login_required(login_url='auth_page')
+@require_http_methods(["GET"])
+def profile_data(request):
+    profile = get_or_create_user_profile(request.user)
+    display_name = request.user.first_name or request.user.username
+
+    return JsonResponse({
+        'id': request.user.id,
+        'name': display_name,
+        'email': request.user.email,
+        'department': profile.department,
+        'role': "RN",
+    })
+
+
+@login_required(login_url='auth_page')
+@require_http_methods(["POST"])
+def update_profile(request):
+    name = request.POST.get('name', '').strip()
+    department = request.POST.get('department', '').strip()
+
+    errors = {}
+    if not name:
+        errors['name'] = "Name is required."
+    elif len(name) > 150:
+        errors['name'] = "Name must be 150 characters or less."
+
+    if not department:
+        errors['department'] = "Department is required."
+    elif len(department) > 100:
+        errors['department'] = "Department must be 100 characters or less."
+
+    if errors:
+        return JsonResponse({'errors': errors}, status=400)
+
+    profile = get_or_create_user_profile(request.user)
+    request.user.first_name = name
+    request.user.save(update_fields=['first_name'])
+    profile.department = department
+    profile.save(update_fields=['department'])
+
+    return JsonResponse({
+        'message': "Profile updated successfully.",
+        'profile': {
+            'id': request.user.id,
+            'name': request.user.first_name,
+            'email': request.user.email,
+            'department': profile.department,
+            'role': "RN",
+        }
+    })

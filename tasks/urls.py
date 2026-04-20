@@ -12,4 +12,6 @@ urlpatterns = [
     path('tasks/<int:task_id>/complete/', views.complete_task, name='complete_task'),
     path('nurses/', views.nurse_list, name='nurse_list'),
     path('reports/', views.reports, name='reports'),
+    path('api/profile/', views.profile_data, name='profile_data'),
+    path('api/profile/update/', views.update_profile, name='update_profile'),
 ]

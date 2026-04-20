@@ -7,6 +7,7 @@
   <title>CareToGo Dashboard</title>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
   <script defer src="{% static 'js/auth-session.js' %}"></script>
+  <script defer src="{% static 'js/profile-modal.js' %}"></script>
 </head>
 <body class="min-h-full bg-slate-100 text-slate-800">
   <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
@@ -42,6 +43,10 @@
           <span>📊</span>
           Reports
         </a>
+        <button type="button" data-open-profile class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white transition">
+          <span>👤</span>
+          Profile
+        </button>
       </nav>
 
       <div class="border-t border-white/10 p-4">
@@ -86,6 +91,20 @@
             <p class="mt-3 max-w-2xl text-sm text-white/90 sm:text-base">
               Keep nurse assignments, patient-related tasks, and status tracking organized in one clean workspace.
             </p>
+          </div>
+          <div class="mt-6 grid gap-3 rounded-2xl bg-white/15 p-4 sm:grid-cols-3">
+            <div>
+              <p class="text-xs uppercase tracking-[0.15em] text-white/70">Name</p>
+              <p data-profile-name class="mt-1 text-lg font-semibold">{{ profile_name }}</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-[0.15em] text-white/70">Department</p>
+              <p data-profile-department class="mt-1 text-lg font-semibold">{{ profile_department }}</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-[0.15em] text-white/70">Title</p>
+              <p data-profile-role class="mt-1 text-lg font-semibold">{{ profile_role }}</p>
+            </div>
           </div>
         </section>
 
@@ -208,8 +227,12 @@
       </div>
     </main>
   </div>
+  {% include 'profile_modal.html' %}
   <script>
-    initAuthGuard();
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof initAuthGuard === "function") initAuthGuard();
+      if (typeof initProfileModal === "function") initProfileModal();
+    });
   </script>
 </body>
 </html>

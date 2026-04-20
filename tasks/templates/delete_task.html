@@ -134,7 +134,9 @@
     </div>
   </div>
   <script>
-    initAuthGuard();
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof initAuthGuard === "function") initAuthGuard();
+    });
   </script>
 </body>
 </html>
