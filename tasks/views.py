@@ -6,12 +6,17 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Task, Nurse, UserProfile
+from .models import Task, Nurse, UserProfile, Patient
 
 
 def get_or_create_user_profile(user):
     profile, _ = UserProfile.objects.get_or_create(user=user)
     return profile
+
+
+def get_authenticated_email(request, user):
+    # Keep email sourced from authenticated context without duplicating DB fields.
+    return user.email or request.session.get('login_email') or user.username
 
 
 def auth_page(request):
@@ -59,6 +64,7 @@ def auth_page(request):
                 user = authenticate(request, username=user_obj.username, password=password)
                 if user is not None:
                     login(request, user)
+                    request.session['login_email'] = user_obj.email or email_or_username
                     return redirect('dashboard')
                 messages.error(request, "Invalid credentials")
 
@@ -66,13 +72,14 @@ def auth_page(request):
 
 
 def logout_view(request):
+    request.session.pop('login_email', None)
     logout(request)
     return redirect('auth_page')
 
 
 @login_required(login_url='auth_page')
 def dashboard(request):
-    tasks = Task.objects.all().order_by('-created_at')
+    tasks = Task.objects.select_related('patient').all().order_by('-created_at')
     total_tasks = tasks.count()
     pending_tasks = tasks.filter(status='pending').count()
     in_progress_tasks = tasks.filter(status='in_progress').count()
@@ -98,7 +105,7 @@ def dashboard(request):
 
 @login_required(login_url='auth_page')
 def task_list(request):
-    tasks = Task.objects.all().order_by('-created_at')
+    tasks = Task.objects.select_related('patient').all().order_by('-created_at')
     return render(request, 'task_list.html', {'tasks': tasks})
 
 
@@ -110,7 +117,7 @@ def nurse_list(request):
 
 @login_required(login_url='auth_page')
 def reports(request):
-    tasks = Task.objects.all().order_by('-created_at')
+    tasks = Task.objects.select_related('patient').all().order_by('-created_at')
     total_tasks = tasks.count()
     pending_tasks = tasks.filter(status='pending').count()
     in_progress_tasks = tasks.filter(status='in_progress').count()
@@ -129,10 +136,11 @@ def reports(request):
 @login_required(login_url='auth_page')
 def add_task(request):
     nurses = Nurse.objects.all()
+    patients = Patient.objects.all().order_by('full_name')
 
     if request.method == 'POST':
         nurse_id = request.POST.get('nurse')
-        patient_name = request.POST.get('patient_name')
+        patient_id = request.POST.get('patient')
         title = request.POST.get('title')
         description = request.POST.get('description')
         scheduled_date = request.POST.get('scheduled_date')
@@ -141,10 +149,12 @@ def add_task(request):
         priority = request.POST.get('priority')
 
         nurse = get_object_or_404(Nurse, id=nurse_id)
+        patient = get_object_or_404(Patient, id=patient_id)
 
         Task.objects.create(
             nurse=nurse,
-            patient_name=patient_name,
+            patient=patient,
+            patient_name=patient.full_name,
             title=title,
             description=description,
             scheduled_date=scheduled_date,
@@ -155,18 +165,21 @@ def add_task(request):
 
         return redirect('task_list')
 
-    return render(request, 'add_task.html', {'nurses': nurses})
+    return render(request, 'add_task.html', {'nurses': nurses, 'patients': patients})
 
 
 @login_required(login_url='auth_page')
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     nurses = Nurse.objects.all()
+    patients = Patient.objects.all().order_by('full_name')
 
     if request.method == 'POST':
         nurse_id = request.POST.get('nurse')
+        patient_id = request.POST.get('patient')
         task.nurse = get_object_or_404(Nurse, id=nurse_id)
-        task.patient_name = request.POST.get('patient_name')
+        task.patient = get_object_or_404(Patient, id=patient_id)
+        task.patient_name = task.patient.full_name
         task.title = request.POST.get('title')
         task.description = request.POST.get('description')
         task.scheduled_date = request.POST.get('scheduled_date')
@@ -180,6 +193,7 @@ def edit_task(request, task_id):
     context = {
         'task': task,
         'nurses': nurses,
+        'patients': patients,
     }
     return render(request, 'edit_task.html', context)
 
@@ -207,6 +221,99 @@ def complete_task(request, task_id):
 
 
 @login_required(login_url='auth_page')
+def patient_list(request):
+    patients = Patient.objects.all().order_by('-created_at')
+    selected_patient = None
+    selected_patient_tasks = []
+    patient_id = request.GET.get('view')
+
+    if patient_id:
+        selected_patient = get_object_or_404(Patient, id=patient_id)
+        selected_patient_tasks = selected_patient.tasks.select_related('nurse').order_by('-created_at')
+
+    context = {
+        'patients': patients,
+        'selected_patient': selected_patient,
+        'selected_patient_tasks': selected_patient_tasks,
+    }
+    return render(request, 'patient_list.html', context)
+
+
+@login_required(login_url='auth_page')
+def patient_detail(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+    patient_tasks = patient.tasks.select_related('nurse').order_by('-created_at')
+    return render(
+        request,
+        'patient_detail.html',
+        {
+            'patient': patient,
+            'patient_tasks': patient_tasks,
+        },
+    )
+
+
+@login_required(login_url='auth_page')
+def add_patient(request):
+    if request.method == 'POST':
+        Patient.objects.create(
+            full_name=request.POST.get('full_name'),
+            age=request.POST.get('age'),
+            gender=request.POST.get('gender'),
+            contact_information=request.POST.get('contact_information'),
+            address=request.POST.get('address'),
+            medical_notes=request.POST.get('medical_notes') or None,
+        )
+        return redirect('patient_list')
+
+    return render(request, 'add_patient.html')
+
+
+@login_required(login_url='auth_page')
+def edit_patient(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+
+    if request.method == 'POST':
+        patient.full_name = request.POST.get('full_name')
+        patient.age = request.POST.get('age')
+        patient.gender = request.POST.get('gender')
+        patient.contact_information = request.POST.get('contact_information')
+        patient.address = request.POST.get('address')
+        patient.medical_notes = request.POST.get('medical_notes') or None
+        patient.save()
+
+        # Keep denormalized task display name synchronized.
+        patient.tasks.update(patient_name=patient.full_name)
+        return redirect('patient_list')
+
+    return render(request, 'edit_patient.html', {'patient': patient})
+
+
+@login_required(login_url='auth_page')
+def delete_patient(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+    linked_tasks_count = patient.tasks.count()
+
+    if request.method == 'POST':
+        if linked_tasks_count > 0:
+            messages.error(
+                request,
+                "This patient cannot be deleted because there are tasks linked to their profile."
+            )
+            return redirect('patient_list')
+
+        patient.delete()
+        messages.success(request, "Patient deleted successfully.")
+        return redirect('patient_list')
+
+    return render(
+        request,
+        'delete_patient.html',
+        {'patient': patient, 'linked_tasks_count': linked_tasks_count},
+    )
+
+
+@login_required(login_url='auth_page')
 @require_http_methods(["GET"])
 def profile_data(request):
     profile = get_or_create_user_profile(request.user)
@@ -215,7 +322,7 @@ def profile_data(request):
     return JsonResponse({
         'id': request.user.id,
         'name': display_name,
-        'email': request.user.email,
+        'email': get_authenticated_email(request, request.user),
         'department': profile.department,
         'role': "RN",
     })
@@ -252,7 +359,7 @@ def update_profile(request):
         'profile': {
             'id': request.user.id,
             'name': request.user.first_name,
-            'email': request.user.email,
+            'email': get_authenticated_email(request, request.user),
             'department': profile.department,
             'role': "RN",
         }

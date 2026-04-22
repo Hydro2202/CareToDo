@@ -12,6 +12,11 @@ urlpatterns = [
     path('tasks/<int:task_id>/complete/', views.complete_task, name='complete_task'),
     path('nurses/', views.nurse_list, name='nurse_list'),
     path('reports/', views.reports, name='reports'),
+    path('patients/', views.patient_list, name='patient_list'),
+    path('patients/<int:patient_id>/', views.patient_detail, name='patient_detail'),
+    path('patients/add/', views.add_patient, name='add_patient'),
+    path('patients/<int:patient_id>/edit/', views.edit_patient, name='edit_patient'),
+    path('patients/<int:patient_id>/delete/', views.delete_patient, name='delete_patient'),
     path('api/profile/', views.profile_data, name='profile_data'),
     path('api/profile/update/', views.update_profile, name='update_profile'),
 ]
