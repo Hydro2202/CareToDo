@@ -10,6 +10,25 @@ class Nurse(models.Model):
         return self.full_name
 
 
+class Patient(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other'),
+    ]
+
+    full_name = models.CharField(max_length=150)
+    age = models.PositiveIntegerField()
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES)
+    contact_information = models.CharField(max_length=150)
+    address = models.TextField()
+    medical_notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.full_name
+
+
 class Task(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -18,6 +37,13 @@ class Task(models.Model):
     ]
 
     nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE, related_name='tasks')
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.SET_NULL,
+        related_name='tasks',
+        blank=True,
+        null=True,
+    )
     patient_name = models.CharField(max_length=150)
     title = models.CharField(max_length=200)
     description = models.TextField()

@@ -58,6 +58,10 @@ async function loadProfileForm() {
   }
 
   const profile = await response.json();
+  const emailInput = document.getElementById("profile-email-input");
+  if (emailInput) {
+    emailInput.value = profile.email || "";
+  }
   document.getElementById("profile-name-input").value = profile.name || "";
   document.getElementById("profile-department-input").value = profile.department || "";
 }
@@ -65,10 +69,15 @@ async function loadProfileForm() {
 function openProfileModal() {
   const modal = document.getElementById("profile-modal");
   const card = document.getElementById("profile-modal-card");
+  const saveButton = document.getElementById("profile-save-button");
   if (!modal) return;
   modal.classList.remove("hidden");
   modal.style.display = "block";
   modal.classList.remove("is-visible");
+  if (saveButton) {
+    saveButton.disabled = false;
+    saveButton.textContent = "Save / Update";
+  }
   if (card) {
     card.style.position = "fixed";
     card.style.top = "50%";

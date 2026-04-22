@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delete Patient</title>
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  <script defer src="{% static 'js/auth-session.js' %}"></script>
+  <style>
+    :root {
+      --title: #0f172a;
+      --text: #334155;
+      --muted: #64748b;
+    }
+
+    @keyframes overlayFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalEnter {
+      from { opacity: 0; transform: translateY(10px) scale(0.94); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.52);
+      backdrop-filter: blur(6px);
+      animation: overlayFadeIn 220ms ease-out;
+    }
+
+    .modal-card {
+      width: min(92vw, 620px);
+      border-radius: 20px;
+      padding: 30px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+      animation: modalEnter 300ms ease-out;
+    }
+
+    .btn {
+      height: 48px;
+      border-radius: 9999px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .btn-neutral {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+    }
+
+    .btn-neutral:hover {
+      background: #f8fafc;
+    }
+
+    .btn-danger {
+      border: 1px solid #be123c;
+      background: #e11d48;
+      color: #ffffff;
+      box-shadow: 0 10px 20px rgba(225, 29, 72, 0.25);
+    }
+
+    .btn-danger:hover {
+      background: #be123c;
+    }
+
+    @media (max-width: 640px) {
+      .modal-card { padding: 22px; width: min(94vw, 620px); }
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans bg-slate-100">
+  <div class="overlay">
+    <div class="modal-card relative">
+      <a
+        href="{% url 'patient_list' %}"
+        aria-label="Close dialog"
+        class="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-xl font-semibold leading-none text-slate-500 shadow-sm transition-all duration-200 hover:bg-slate-100 hover:text-rose-600"
+      >
+        <span class="-mt-1">&times;</span>
+      </a>
+
+      <div class="text-center">
+        <p class="mx-auto inline-flex rounded-full border border-sky-200 bg-sky-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-sky-700 shadow-sm">
+          Delete Confirmation
+        </p>
+        <h1 class="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl" style="color: var(--title);">Delete Patient?</h1>
+        <p class="mt-4 text-base leading-relaxed" style="color: var(--text);">
+          Are you sure you want to delete
+          <span class="font-bold" style="color: var(--title);">"{{ patient.full_name }}"</span>?
+        </p>
+        <p class="mt-1 text-sm" style="color: var(--muted);">You can't undo this action.</p>
+      </div>
+
+      <div class="mt-6 rounded-xl border border-sky-100 bg-sky-50 p-4 sm:p-5 shadow-sm">
+        <p class="inline-flex items-center gap-2 text-sm font-semibold text-sky-900">
+          <span aria-hidden="true">⚠️</span>
+          Warning
+        </p>
+        <p class="mt-1 text-sm text-sky-900/90">
+          {% if linked_tasks_count > 0 %}
+          This patient has {{ linked_tasks_count }} linked task{{ linked_tasks_count|pluralize }}. Deletion is blocked to keep data consistent.
+          {% else %}
+          By deleting this patient, all connected data references will be removed.
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
+        <a
+          href="{% url 'patient_list' %}"
+          class="btn btn-neutral inline-flex w-full items-center justify-center sm:flex-1"
+        >
+          Cancel
+        </a>
+        <form method="POST" class="m-0 w-full sm:flex-1">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="btn btn-danger inline-flex w-full items-center justify-center gap-2 sm:flex-1 {% if linked_tasks_count > 0 %}cursor-not-allowed opacity-60 hover:bg-rose-600{% endif %}"
+            {% if linked_tasks_count > 0 %}disabled aria-disabled="true"{% endif %}
+          >
+            <span aria-hidden="true">🗑️</span>
+            Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof initAuthGuard === "function") initAuthGuard();
+    });
+  </script>
+</body>
+</html>

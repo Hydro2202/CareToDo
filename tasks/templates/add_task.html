@@ -47,8 +47,13 @@
 
           <div class="grid gap-5 md:grid-cols-2">
             <div>
-              <label class="mb-2 block text-sm font-semibold text-slate-700">Patient Name</label>
-              <input type="text" name="patient_name" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+              <label class="mb-2 block text-sm font-semibold text-slate-700">Patient</label>
+              <select name="patient" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
+                <option value="">Select patient</option>
+                {% for patient in patients %}
+                <option value="{{ patient.id }}">{{ patient.full_name }}</option>
+                {% endfor %}
+              </select>
             </div>
 
             <div>
@@ -80,7 +85,6 @@
               <select name="status" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100">
                 <option value="pending">Pending</option>
                 <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
               </select>
             </div>
 

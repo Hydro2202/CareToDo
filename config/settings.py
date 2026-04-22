@@ -94,3 +94,10 @@ STATICFILES_DIRS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Session timeout: expire authenticated sessions after 1 hour.
+# This applies to admin and regular user logins.
+SESSION_COOKIE_AGE = 60 * 60
+
+# Refresh expiry on activity, so timeout is 1 hour of inactivity.
+SESSION_SAVE_EVERY_REQUEST = True

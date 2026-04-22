@@ -1,0 +1,62 @@
+{% load static tz %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Details</title>
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  <script defer src="{% static 'js/auth-session.js' %}"></script>
+</head>
+<body class="min-h-full bg-slate-100 text-slate-800">
+  <div class="mx-auto max-w-5xl px-5 py-8 sm:px-8">
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-sky-600">Patient Profile</p>
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900">{{ patient.full_name }}</h1>
+      </div>
+      <a href="{% url 'patient_list' %}" class="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">
+        Back to Patients
+      </a>
+    </div>
+
+    <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Age</p><p class="font-semibold">{{ patient.age }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Gender</p><p class="font-semibold">{{ patient.get_gender_display }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Contact Information</p><p class="font-semibold">{{ patient.contact_information }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Date Created</p><p class="font-semibold">{{ patient.created_at|timezone:"Asia/Manila"|date:"M d, Y" }}</p></div>
+      </div>
+
+      <div class="mt-4 rounded-2xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-500">Address</p>
+        <p class="font-semibold">{{ patient.address }}</p>
+      </div>
+
+      <div class="mt-4 rounded-2xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-500">Medical Notes</p>
+        <p class="font-semibold">{{ patient.medical_notes|default:"No notes provided." }}</p>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-xl font-bold tracking-tight text-slate-900">Associated Tasks</h2>
+      <div class="mt-4 space-y-2">
+        {% for task in patient_tasks %}
+          <a href="{% url 'edit_task' task.id %}" class="block rounded-xl border border-slate-200 p-3 text-sm hover:bg-slate-50">
+            <span class="font-semibold">{{ task.title }}</span>
+            <span class="text-slate-500"> - {{ task.nurse.full_name }} - {{ task.status }}</span>
+          </a>
+        {% empty %}
+          <p class="text-sm text-slate-500">No tasks linked to this patient.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof initAuthGuard === "function") initAuthGuard();
+    });
+  </script>
+</body>
+</html>
