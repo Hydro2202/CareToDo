@@ -19,4 +19,10 @@ urlpatterns = [
     path('patients/<int:patient_id>/delete/', views.delete_patient, name='delete_patient'),
     path('api/profile/', views.profile_data, name='profile_data'),
     path('api/profile/update/', views.update_profile, name='update_profile'),
+    path('api/nurses/', views.nurses_api, name='nurses_api'),
+    path('api/nurses/<int:nurse_id>/', views.nurse_detail_api, name='nurse_detail_api'),
+    path('api/patients/', views.patients_api, name='patients_api'),
+    path('api/patients/<int:patient_id>/', views.patient_detail_api, name='patient_detail_api'),
+    path('api/tasks/', views.tasks_api, name='tasks_api'),
+    path('api/tasks/<int:task_id>/', views.task_detail_api, name='task_detail_api'),
 ]
